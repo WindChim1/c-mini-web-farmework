@@ -148,3 +148,39 @@ fn handle_route<'a>(
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::{collections::HashMap, error::Error, net::SocketAddr};
+
+    use crate::{request::Request, response::Response, server::ServerBuild, util::HttpMethod};
+
+    use super::FutureResponse;
+
+    #[tokio::test]
+    async fn server_start() -> Result<(), Box<dyn Error>> {
+        let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+        ServerBuild::new()
+            .bind(addr)
+            .route("/", HttpMethod::GET, hello_world)
+            .build()?
+            .run()
+            .await?;
+        Ok(())
+    }
+    fn hello_world(_req: Request) -> FutureResponse<'static> {
+        let html = "<html><body><h1>Hello, world!</h1></body></html>";
+        let response = Response {
+            version: "HTTP/1.1".to_string(),
+            status_code: 200,
+            status_text: "OK".to_string(),
+            headers: {
+                let mut headers = HashMap::new();
+                headers.insert("Content-Type".to_string(), "text/html".to_string());
+                headers
+            },
+            body: Some(html.to_string()),
+        };
+        Box::pin(async move { Ok(response) })
+    }
+}
