@@ -18,7 +18,7 @@ pub enum HttpMethod {
 }
 
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
-#[repr(u8)]
+#[repr(u16)]
 pub enum HttpStatusCode {
     #[default]
     Success = 200,
